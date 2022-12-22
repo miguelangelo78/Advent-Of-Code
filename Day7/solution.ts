@@ -142,7 +142,23 @@ function part1() {
 function part2() {
   let solution = 0;
 
-  console.log('Solution part 1: ', solution);
+  const root = parse_cmdHistory(input);
+
+  const totalDiskSize = 70000000;
+  const requiredUnusedSpace = 30000000;
+  const unusedSpace = totalDiskSize - root.totalSize;
+
+  const candidates: number[] = [];
+
+  root.flatTree?.forEach((dir) => {
+    if (unusedSpace + dir.totalSize > requiredUnusedSpace) {
+      candidates.push(dir.totalSize);
+    }
+  });
+
+  solution = Math.min(...candidates);
+
+  console.log('Solution part 2: ', solution);
 }
 
 part1();
