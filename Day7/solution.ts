@@ -7,7 +7,6 @@ class File {
 }
 
 class Tree {
-  public id: number = 0;
   public root: Tree | null = null;
   public fullPath = '';
   public totalSize: number = 0;
