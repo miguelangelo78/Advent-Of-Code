@@ -10,9 +10,9 @@ const inputLines = fs.readFileSync('input.txt', 'utf8').split('\n');
  * @param howMany 
  * @returns 
  */
-function checkForColour(
-  colour: 'red' | 'green' | 'blue',
+function checkTooManyForColour(
   line: string,
+  colour: 'red' | 'green' | 'blue',
   howMany: number,
 ): boolean {
   const found = line.match(new RegExp(`[\\d]+ ${colour}`, 'g'))
@@ -21,16 +21,33 @@ function checkForColour(
   return found.some((x) => x > howMany);
 }
 
+/**
+ * Returns the fewest required of the given colour in the given line.
+ * 
+ * @param line 
+ * @param colour 
+ * @returns 
+ */
+function getFewest(
+  line: string,
+  colour: 'red' | 'green' | 'blue',
+): number {
+  const found = line.match(new RegExp(`([\\d]+) ${colour}`, 'g'))
+    ?.map((x) => +x.match(/([\d]+)/)![1])!;
+
+  return Math.max(...found);
+}
+
 function getSumIdGames(
   inputLines: string[],
   howManyRed = 12,
   howManyGreen = 13,
-  howManyBlue = 14
+  howManyBlue = 14,
 ): number {
-  const sums = inputLines.map((line) => {
-    if (checkForColour('red', line, howManyRed)
-      || checkForColour('green', line, howManyGreen)
-      || checkForColour('blue', line, howManyBlue)) {
+  const howMany = inputLines.map((line) => {
+    if (checkTooManyForColour(line, 'red', howManyRed)
+      || checkTooManyForColour(line, 'green', howManyGreen)
+      || checkTooManyForColour(line, 'blue', howManyBlue)) {
       // Too many of one colour
       return 0;
     }
@@ -40,7 +57,19 @@ function getSumIdGames(
     return gameId;
   });
 
-  return sums.reduce((a, b) => a + b);
+  return howMany.reduce((a, b) => a + b);
+}
+
+function getPowerOfFewest(inputLines: string[]): number {
+  const powerOfFewest = inputLines.map((line) => {
+    const fewestReds = getFewest(line, 'red');
+    const fewestGreens = getFewest(line, 'green');
+    const fewestBlues = getFewest(line, 'blue');
+
+    return fewestReds * fewestGreens * fewestBlues;
+  });
+
+  return powerOfFewest.reduce((a, b) => a + b);
 }
 
 // Part 1
@@ -48,5 +77,5 @@ const solution1 = getSumIdGames(inputLines);
 console.log(`Solution part 1: ${solution1}`);
 
 // Part 2
-//const solution2 = getSumCalibrationValues(inputLines, true);
-//console.log(`Solution part 2: ${solution2}`);
+const solution2 = getPowerOfFewest(inputLines);
+console.log(`Solution part 2: ${solution2}`);
