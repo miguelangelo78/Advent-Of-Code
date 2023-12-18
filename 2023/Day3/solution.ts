@@ -49,10 +49,24 @@ function getSolution1(inputLines: string[]) {
   for (let i = 0; i < symbolTokens.length; i++) {
     const symbolToken = symbolTokens[i];
 
-    for(let j = 0; j < numberTokens.length; j++) {
+    for (let j = 0; j < numberTokens.length; j++) {
+      // Get distance from numberToken to symbolToken
+
       const numberToken = numberTokens[j];
 
-      // TODO: Get distance from numberToken to symbolToken 
+      let xDistance, yDistance;
+
+      if (numberToken.x >= symbolToken.x) {
+        xDistance = Math.abs(numberToken.x - symbolToken.x);
+      } else {
+        xDistance = Math.abs((numberToken.x + numberToken.length - 1) - symbolToken.x);
+      }
+
+      yDistance = Math.abs(numberToken.y - symbolToken.y);
+
+      if (xDistance <= 1 && yDistance <= 1) {
+        sol += +numberToken.char;
+      }
     }
   }
 
@@ -61,7 +75,7 @@ function getSolution1(inputLines: string[]) {
 
 // Part 1
 const solution1 = getSolution1(inputLines);
-console.log(`Solution part 1: ${getSolution1}`);
+console.log(`Solution part 1: ${solution1}`);
 
 // Part 2
 //const solution2 = getSolution2(inputLines);
