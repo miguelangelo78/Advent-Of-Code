@@ -34,13 +34,21 @@ function tokeniseLine(inputLine: string, y: number): Token[] {
 }
 
 function tokeniseAllLines(inputLines: string[]): Token[] {
-  const tokens = [];
+  return inputLines.map((inputLine, y) => tokeniseLine(inputLine, y)).flat();
+}
 
-  for (let y = 0; y < inputLines.length; y++) {
-    tokens.push(...tokeniseLine(inputLines[y], y));
+function getTokenDistances(token1: Token, token2: Token): [number, number] {
+  let xDistance, yDistance;
+
+  if (token1.x >= token2.x) {
+    xDistance = Math.abs(token1.x - token2.x);
+  } else {
+    xDistance = Math.abs((token1.x + token1.length - 1) - token2.x);
   }
 
-  return tokens;
+  yDistance = Math.abs(token1.y - token2.y);
+
+  return [xDistance, yDistance];
 }
 
 function getSolution1(inputLines: string[]) {
@@ -52,27 +60,16 @@ function getSolution1(inputLines: string[]) {
   const symbolTokens = tokens.filter((token) => isNaN(+token.char));
   const numberTokens = tokens.filter((token) => !isNaN(+token.char));
 
-  // For each symbol token, check if there is a number token in the 8 directions
+  // For each symbol token, check if there is an adjacent number in the X and Y axis
   for (let i = 0; i < symbolTokens.length; i++) {
     const symbolToken = symbolTokens[i];
 
     for (let j = 0; j < numberTokens.length; j++) {
       // Get distance from numberToken to symbolToken
-
-      const numberToken = numberTokens[j];
-
-      let xDistance, yDistance;
-
-      if (numberToken.x >= symbolToken.x) {
-        xDistance = Math.abs(numberToken.x - symbolToken.x);
-      } else {
-        xDistance = Math.abs((numberToken.x + numberToken.length - 1) - symbolToken.x);
-      }
-
-      yDistance = Math.abs(numberToken.y - symbolToken.y);
+      const [xDistance, yDistance] = getTokenDistances(numberTokens[j], symbolToken);
 
       if (xDistance <= 1 && yDistance <= 1) {
-        sol += +numberToken.char;
+        sol += +numberTokens[j].char;
       }
     }
   }
@@ -94,20 +91,10 @@ function getSolution2(inputLines: string[]) {
     let adjacentNumbers = [];
 
     for (let j = 0; j < numberTokens.length; j++) {
-      const numberToken = numberTokens[j];
-
-      let xDistance, yDistance;
-
-      if (numberToken.x >= gearToken.x) {
-        xDistance = Math.abs(numberToken.x - gearToken.x);
-      } else {
-        xDistance = Math.abs((numberToken.x + numberToken.length - 1) - gearToken.x);
-      }
-
-      yDistance = Math.abs(numberToken.y - gearToken.y);
+      const [xDistance, yDistance] = getTokenDistances(numberTokens[j], gearToken);
 
       if (xDistance <= 1 && yDistance <= 1) {
-        adjacentNumbers.push(numberToken);
+        adjacentNumbers.push(numberTokens[j]);
         if (adjacentNumbers.length === 2) {
           sol += adjacentNumbers.reduce((acc, curr) => acc * +curr.char, 1);
           break;
