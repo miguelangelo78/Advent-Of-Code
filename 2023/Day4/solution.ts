@@ -53,7 +53,7 @@ function getSolution2(inputLines: string[]) {
     const card = scratchCards[i];
 
     if (card.matchedNumbers.length > 0) {
-      // Copy scratch card from index i by length of matchedNumbers
+      // Copy scratch card from index card.cardIndex by length of matchedNumbers
       for (let j = card.cardIndex + 1; j < card.cardIndex + 1 + card.matchedNumbers.length; j++) {
         if (scratchCards[j].isCopy) {
           scratchCards[j].isProcessed = true;
