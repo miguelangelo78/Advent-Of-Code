@@ -68,6 +68,29 @@ function getSolution1(inputLines: string[]) {
 function getSolution2(inputLines: string[]) {
   let sol = 0;
 
+  const { farmMaps, seeds } = parseFarmMap(inputLines);
+
+  let smallestLocation: number | null = null;
+
+  for (let i = 0; i < seeds.length - 1; i += 2) {
+    const seed = seeds[i];
+    const length = seeds[i + 1];
+
+    for (let seedIdx = 0; seedIdx < length; seedIdx++) {
+      let results = [seed + seedIdx];
+      for (const farmMap of farmMaps) {
+        results = results.map(source => mapSourceToDestination(source, farmMap));
+      }
+
+      const tmp = Math.min(...results);
+      if (smallestLocation === null || tmp <= smallestLocation) {
+        smallestLocation = tmp;
+      }
+    }
+  }
+
+  sol = smallestLocation || 0;
+
   return sol;
 }
 
