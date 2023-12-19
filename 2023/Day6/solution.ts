@@ -7,9 +7,14 @@ interface BoatRace {
   distance: number;
 }
 
-function parseBoatRaces(inputLines: string[]) {
-  const times = inputLines[0].split(':')[1].trim().split(' ').filter(Boolean).map((x) => parseInt(x));
-  const distances = inputLines[1].split(':')[1].trim().split(' ').filter(Boolean).map((x) => parseInt(x));
+function parseBoatRaces(inputLines: string[], ignoreSpaces = false) {
+  let timesTmp = inputLines[0].split(':')[1].trim().split(' ');
+  if (ignoreSpaces) timesTmp = [timesTmp.join('')];
+  const times = timesTmp.filter(Boolean).map((x) => parseInt(x));
+
+  let distancesTmp = inputLines[1].split(':')[1].trim().split(' ');
+  if (ignoreSpaces) distancesTmp = [distancesTmp.join('')];
+  const distances = distancesTmp.filter(Boolean).map((x) => parseInt(x));
 
   const boatRaces: BoatRace[] = [];
 
@@ -58,6 +63,12 @@ function getSolution1(inputLines: string[]) {
 
 function getSolution2(inputLines: string[]) {
   let sol = 0;
+
+  const boatRaces = parseBoatRaces(inputLines, true);
+
+  const waysToWin = boatRaces.map((boatRace) => calculateWaysToWin(boatRace));
+
+  sol = waysToWin.reduce((acc, curr) => acc * curr, 1);
 
   return sol;
 }
