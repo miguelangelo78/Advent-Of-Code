@@ -13,27 +13,38 @@ enum HandType {
 }
 
 const cards = ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'];
+const cardsWithJokerRule = ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'];
 
 interface CamelCard {
   hand: string[];
   bid: number;
   type: HandType;
-  rank?: number;
 }
 
 function getXOfAKind(cardMap: Map<string, number>, x: number): [string, number][] {
-  const xOfTheSame = Array.from(cardMap.entries()).filter(([_, count]) => count === x);
-  return xOfTheSame;
+  return Array.from(cardMap.entries()).filter(([_, count]) => count === x);
 }
 
-function getCardStrength(card: string): number {
-  return cards.length - cards.indexOf(card);
+function getCardStrength(cardDeck: string[], card: string): number {
+  return cardDeck.length - cardDeck.indexOf(card);
 }
 
-function getHandType(hand: string[]): HandType {
+function getHandType(hand: string[], useJokerRule: boolean): HandType {
   // If all cards are the same, it's a five of a kind
   if (hand.every((card) => card === hand[0])) {
     return HandType.FiveOfAKind;
+  }
+
+  if (useJokerRule) {
+    let bestHandType = HandType.HighCard;
+
+    // Consider all possible substitutions for 'J'
+    for (const substitute of cards) {
+      const substitutedHand = hand.map(card => card === 'J' ? substitute : card);
+      const currentHandType = getHandType(substitutedHand, false);
+      bestHandType = Math.max(bestHandType, currentHandType);
+    }
+    return bestHandType;
   }
 
   const cardMap = new Map<string, number>();
@@ -78,7 +89,7 @@ function getHandType(hand: string[]): HandType {
   return HandType.HighCard;
 }
 
-function parseCamelCards(inputLines: string[]): CamelCard[] {
+function parseCamelCards(inputLines: string[], useJokerRule = false): CamelCard[] {
   const camelCards: CamelCard[] = [];
   for (const line of inputLines) {
     const [cards, bid] = line.split(' ');
@@ -87,7 +98,7 @@ function parseCamelCards(inputLines: string[]): CamelCard[] {
     camelCards.push({
       hand,
       bid: parseInt(bid, 10),
-      type: getHandType(hand),
+      type: getHandType(hand, useJokerRule),
     });
   }
   return camelCards;
@@ -104,10 +115,10 @@ function getSolution1(inputLines: string[]) {
   // Sort the hands of the same type by their card strength:
   camelCards = camelCards.sort((a, b) => {
     if (a.type === b.type) {
-      // Compare all the strenghts of the cards in the hand
+      // Compare all the strengths of the cards in the hand
       for (let i = 0; i < a.hand.length; i++) {
-        const aStrength = getCardStrength(a.hand[i]);
-        const bStrength = getCardStrength(b.hand[i]);
+        const aStrength = getCardStrength(cards, a.hand[i]);
+        const bStrength = getCardStrength(cards, b.hand[i]);
         if (aStrength !== bStrength) {
           return bStrength - aStrength;
         }
@@ -126,6 +137,31 @@ function getSolution1(inputLines: string[]) {
 
 function getSolution2(inputLines: string[]) {
   let sol = 0;
+
+  let camelCards = parseCamelCards(inputLines, true);
+
+  // Sort by type:
+  camelCards = camelCards.sort((a, b) => b.type - a.type);
+
+  // Sort the hands of the same type by their card strength:
+  camelCards = camelCards.sort((a, b) => {
+    if (a.type === b.type) {
+      // Compare all the strengths of the cards in the hand
+      for (let i = 0; i < a.hand.length; i++) {
+        const aStrength = getCardStrength(cardsWithJokerRule, a.hand[i]);
+        const bStrength = getCardStrength(cardsWithJokerRule, b.hand[i]);
+        if (aStrength !== bStrength) {
+          return bStrength - aStrength;
+        }
+      }
+    }
+    return 0;
+  });
+
+  camelCards = camelCards.reverse();
+
+  // Calculate the score:
+  sol = camelCards.reduce((acc, camelCard, index) => acc + camelCard.bid * (index + 1), 0);
 
   return sol;
 }
